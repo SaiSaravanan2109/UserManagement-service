@@ -69,7 +69,7 @@ resource "aws_ecs_service" "usermgmt" {
 
   
   load_balancer {
-    target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:529088274428:targetgroup/ALBtoECS/759d7fe93729b543"
+    target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:529088274428:loadbalancer/app/Sai-ALB/30bb5a1664171817"
     container_name   = "usermgmt"
     container_port   = 8095
   }
@@ -97,5 +97,6 @@ resource "aws_security_group" "ecs_tasks" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
 
 
