@@ -5,9 +5,9 @@ private_subnets = ["subnet-0d4d3847f381abf59", "subnet-0c8987bb821da513d"]
 
 
 ecr_registry   = "529088274428.dkr.ecr.us-east-1.amazonaws.com"
-ecr_repository = "shaecr"
+ecr_repository = "saijag"
 
-# Will be dynamically passed by Jenkins
 image_tag = "override-me-from-jenkins"
 
 ecs_task_execution_role_name = "ecsTaskExecutionRole-new"
+
