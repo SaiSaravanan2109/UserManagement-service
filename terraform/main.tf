@@ -40,7 +40,7 @@ resource "aws_ecs_task_definition" "usermgmt" {
       { name = "AWS_RDS_PORT",      value = "3306" },
       { name = "AWS_RDS_DB_NAME",   value = "usermanagement" },
       { name = "AWS_RDS_USERNAME",  value = "admin" },
-      { name = "AWS_RDS_PASSWORD",  value = "XbqB4qo77SpmNVbFK6VF" }
+      { name = "AWS_RDS_PASSWORD",  value = "93jXSQiLDj0N8D2jtJHC" }
     ]
 
     logConfiguration = {
@@ -97,3 +97,4 @@ resource "aws_security_group" "ecs_tasks" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
