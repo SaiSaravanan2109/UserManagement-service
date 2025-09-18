@@ -1,0 +1,68 @@
+node {
+    def awsRegion = 'us-east-1'
+    def ecrRegistry = '529088274428.dkr.ecr.us-east-1.amazonaws.com'
+    def ecrRepository = 'saijag'
+    def gitBranch = 'feature/sai'
+    def gitRepo = 'https://github.com/SaiSaravanan2109/UserManagement-service.git'
+
+    def imageTag = ''
+
+    stage('Checkout') {
+        git branch: gitBranch, url: gitRepo, credentialsId: 'git-creds'
+        imageTag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+        echo "✔️ Checked out code at commit: ${imageTag}"
+    }
+
+    stage('Build Maven Package') {
+        echo '📦 Building package...'
+        sh 'mvn clean package'
+
+        env.JAR_FILE = sh(
+            script: "ls target/*.jar | grep -v 'original' | head -n 1 | xargs basename",
+            returnStdout: true
+        ).trim()
+        echo "✔️ JAR file: ${env.JAR_FILE}"
+    }
+
+    stage('Build Docker Image') {
+        echo "🐳 Building Docker image..."
+        sh """
+            docker build --build-arg JAR_FILE=${env.JAR_FILE} -t ${ecrRepository}:${imageTag} .
+            docker tag ${ecrRepository}:${imageTag} ${ecrRegistry}/${ecrRepository}:${imageTag}
+        """
+    }
+
+    stage('Login to ECR') {
+        echo '🔐 Logging into AWS ECR using session profile from ~/.aws/credentials...'
+        withEnv(["AWS_PROFILE=jenkins-session"]) {
+            sh """
+                aws ecr get-login-password --region ${awsRegion} | \
+                docker login --username AWS --password-stdin ${ecrRegistry}
+            """
+        }
+    }
+
+    stage('Push Docker Image to ECR') {
+        echo '📤 Pushing Docker image to ECR...'
+        sh "docker push ${ecrRegistry}/${ecrRepository}:${imageTag}"
+    }
+
+    stage('Terraform Deploy') {
+        dir('terraform') {
+            echo '📦 Terraform Init...'
+            withEnv(['AWS_PROFILE=jenkins-session']) {
+                sh 'terraform init'
+
+                echo '🚀 Terraform Plan and Apply...'
+                sh """
+                    terraform plan -var="image_tag=${imageTag}" -out=tfplan
+                    terraform apply -auto-approve tfplan
+                """
+            }
+        }
+    }
+
+    stage('Done') {
+        echo '✅ Deployment completed!'
+    }
+}
