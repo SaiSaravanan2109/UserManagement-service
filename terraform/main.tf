@@ -7,7 +7,7 @@ data "aws_iam_role" "ecs_execution_role" {
 }
 
 resource "aws_cloudwatch_log_group" "ecs_logs" {
-  name              = "/ecs/usermgmt"
+  name              = "/ecs/usermanagement"
   retention_in_days = 7
 }
 
@@ -36,7 +36,7 @@ resource "aws_ecs_task_definition" "usermgmt" {
     }]
 
     environment = [
-      { name = "AWS_RDS_HOSTNAME",  value = "sha-db.c6h44cmyuuaw.us-east-1.rds.amazonaws.com" },
+      { name = "AWS_RDS_HOSTNAME",  value = "sai-db.c6h44cmyuuaw.us-east-1.rds.amazonaws.com" },
       { name = "AWS_RDS_PORT",      value = "3306" },
       { name = "AWS_RDS_DB_NAME",   value = "usermanagement" },
       { name = "AWS_RDS_USERNAME",  value = "admin" },
@@ -67,7 +67,7 @@ resource "aws_ecs_service" "usermgmt" {
     security_groups  = [aws_security_group.ecs_tasks.id]
   }
 
-  # ✅ Attach service to ALB target group
+  
   load_balancer {
     target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:529088274428:targetgroup/ALBtoECS/759d7fe93729b543"
     container_name   = "usermgmt"
@@ -82,7 +82,7 @@ resource "aws_security_group" "ecs_tasks" {
   description = "Allow HTTP traffic to ECS tasks"
   vpc_id      = var.vpc_id
 
-  # ✅ Allow only ALB to access port 8095
+  
   ingress {
     from_port       = 8095
     to_port         = 8095
@@ -97,4 +97,5 @@ resource "aws_security_group" "ecs_tasks" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
 
